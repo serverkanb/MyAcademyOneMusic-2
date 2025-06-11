@@ -1,0 +1,40 @@
+﻿@model Album
+@{
+    ViewData["Title"] = "AlbumDetail";
+    Layout = "~/Views/UILayout/Index.cshtml";
+}
+
+
+
+<section class="album-detail-area section-padding-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4">
+                <img src="@Model.CoverImage" class="img-fluid" alt="@Model.AlbumName" />
+            </div>
+            <div class="col-lg-8">
+                <h2>@Model.AlbumName</h2>
+                <p><strong>Sanatçı:</strong> @Model.Singer?.Name</p>
+                <p><strong>Tür:</strong> @Model.Category?.CategoryName</p>
+                <p><strong>Çıkış Tarihi:</strong> @Model.RelaseDate?.ToShortDateString()</p>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4>Şarkılar</h4>
+                <ul class="list-group">
+                    @foreach (var song in Model.Songs)
+                    {
+                        <li class="list-group-item d-flex align-items-center">
+                            <span class="me-3">@song.SongName</span>
+                            <audio controls>
+                                <source src="@song.SongUrl" />
+                            </audio>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>

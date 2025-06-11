@@ -1,0 +1,45 @@
+﻿@model Album
+@{
+    ViewData["Title"] = "UpdateAlbum";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+
+<h2>Albüm Güncelle</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="AlbumId" />
+    <div class="form-group">
+       
+        <label>Albüm Adı</label>
+        <input type="text" asp-for="AlbumName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Fiyat</label>
+        <input type="number" asp-for="Price" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Kapak Resmi (URL)</label>
+        <input type="text" asp-for="CoverImage" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Sanatçı</label>
+        <select asp-for="SingerId" asp-items="ViewBag.singers" class="form-control">
+           
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Kategori</label>
+        <select asp-for="CategoryId" asp-items="ViewBag.categories" class="form-control">
+         
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Güncelle</button>
+</form>
+
+

@@ -1,0 +1,64 @@
+﻿@model Singer
+@{
+    ViewData["Title"] = "SingerDetails";
+    Layout = "~/Views/UILayout/Index.cshtml";
+}
+
+<section class="album-detail-area section-padding-100">
+    <div class="container">
+
+        <!-- Sanatçı Bilgileri -->
+        <div class="row mb-5">
+            <div class="col-lg-4">
+                <img src="@Model.ImageUrl" class="img-fluid rounded shadow" alt="@Model.Name" />
+            </div>
+            <div class="col-lg-8">
+                <h2>@Model.Name</h2>
+                <p><strong>Sanatçı:</strong> @Model.Name</p>
+                <p><strong>Biyografi:</strong>@Model.About</p>
+            </div>
+        </div>
+
+        <!-- Albüm Listesi -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h3 class="mb-4">Albümler</h3>
+            </div>
+
+            @foreach (var albumGroup in Model.Songs.GroupBy(x => x.AlbumId))
+            {
+                var album = albumGroup.First().Album;
+
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="single-album">
+                        <a asp-controller="Albums" asp-action="AlbumDetail" asp-route-id="@album.AlbumId">
+                            <img src="@album.CoverImage" alt="@album.AlbumName" class="img-fluid rounded shadow" />
+                        </a>
+                        <div class="album-info mt-2 text-center">
+                            <h6>@album.AlbumName</h6>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Şarkılar Listesi -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4>Şarkılar</h4>
+                <ul class="list-group">
+                    @foreach (var song in Model.Songs)
+                    {
+                        <li class="list-group-item d-flex align-items-center justify-content-between">
+                            <span>@song.SongName</span>
+                            <audio controls>
+                                <source src="@song.SongUrl" />
+                            </audio>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</section>

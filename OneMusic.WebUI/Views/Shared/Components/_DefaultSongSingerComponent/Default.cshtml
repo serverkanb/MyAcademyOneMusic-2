@@ -1,0 +1,88 @@
+﻿@model SongSingerViewModel
+
+<section class="miscellaneous-area section-padding-100-0">
+    <div class="container">
+        <div class="row">
+            <!-- ***** Weeks Top ***** -->
+            <div class="col-12 col-lg-4">
+                <div class="weeks-top-area mb-100">
+                    <div class="section-heading text-left mb-50 wow fadeInUp" data-wow-delay="50ms">
+                        <p></p>
+                        <h2>En Yeni Albümler</h2>
+                    </div>
+
+                    @foreach (var album in Model.NewAlbums)
+                    {
+                        <div class="single-top-item d-flex wow fadeInUp" data-wow-delay="100ms">
+                            <div class="thumbnail">
+                                <a asp-controller="Albums" asp-action="AlbumDetail" asp-route-id="@album.AlbumId">
+                                    <img src="@album.CoverImage" alt="@album.AlbumName">
+                                </a>
+
+                            </div>
+                            <div class="content-">
+                                <h6>@album.Singer?.Name</h6>
+                                <p>@album.AlbumName</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ***** New Hits Songs ***** -->
+            <div class="col-12 col-lg-4">
+                <div class="new-hits-area mb-100">
+                    <div class="section-heading text-left mb-50 wow fadeInUp" data-wow-delay="50ms">
+                        <p></p>
+                        <h2>En Yeni Şarkılar</h2>
+                    </div>
+
+                    @foreach (var song in Model.NewSongs)
+                    {
+                        <div class="single-new-item d-flex align-items-center justify-content-between wow fadeInUp" data-wow-delay="100ms">
+                            <div class="first-part d-flex align-items-center">
+                                <div class="thumbnail">
+                                    <img src="@song.Album?.CoverImage" alt="">
+                                </div>
+                                <div class="content-">
+                                    <h6>@song.Album?.Singer?.Name</h6>
+                                    <p>@song.SongName</p>
+                                </div>
+                            </div>
+                            <audio preload="auto" controls>
+                                <source src="@song.SongUrl">
+                            </audio>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ***** Popular Artists ***** -->
+            <div class="col-12 col-lg-4">
+                <div class="popular-artists-area mb-100">
+                    <div class="section-heading text-left mb-50 wow fadeInUp" data-wow-delay="50ms">
+                        <p></p>
+                        <h2>En yeni Sanatçılar</h2>
+                    </div>
+
+                    @foreach (var artist in Model.NewArtists)
+                    {
+                        <div class="single-artists d-flex align-items-center wow fadeInUp" data-wow-delay="100ms">
+                            <div class="thumbnail">
+                                 <a asp-controller="Singer" asp-action="SingerDetails" asp-route-id="@artist.SingerId">
+                                <img src="@artist.ImageUrl" alt="">
+                                </a>
+                            </div>
+                            <div class="content-">
+                                <a asp-for="Singer" asp-action="SingerDetails" asp-route-id="@artist.SingerId">
+                                <p>@artist.Name</p>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

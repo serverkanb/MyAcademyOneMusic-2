@@ -1,0 +1,47 @@
+﻿@model List<Album>
+<section class="latest-albums-area section-padding-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-heading style-2">
+                    <p>En Yeni Albümleri Keşfedin</p>
+                    <h2>Son Çıkan Albümler</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-9">
+                <div class="ablums-text text-center mb-70">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="albums-slideshow owl-carousel">
+                    <!-- Single Album -->
+                    @foreach (var item in Model)
+                    {
+
+                        <div class="single-album">
+                            <a asp-controller="Albums" asp-action="AlbumDetail" asp-route-id="@item.AlbumId">
+                                <img src="@item.CoverImage" alt="@item.AlbumName">
+                            </a>
+                            <div class="album-info">
+                                <a asp-controller="Albums" asp-action="AlbumDetail" asp-route-id="@item.AlbumId">
+                                    <h5>@item.Singer?.Name</h5>
+                                </a>
+                                <p>@item.AlbumName</p>
+                            </div>
+                        </div>
+                    }
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

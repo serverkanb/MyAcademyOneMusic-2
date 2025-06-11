@@ -1,0 +1,27 @@
+﻿@model Contact
+@{
+    ViewData["Title"] = "CreateContact";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<h3>İletişim bilgileri Ekleme Sayfası</h3>
+
+<br />
+
+<form method="post">
+
+    <label>Açık Adres</label>
+    <input type="text" asp-for="Address" class="form-control" />
+    <br />
+    <label>Email</label>
+    <input type="text" asp-for="Email" class="form-control" />
+    <br />
+    <label>Phone</label>
+    <input type="text" asp-for="Phone" class="form-control" />
+    <br />
+    <label>MapUrl</label>
+    <input type="text" asp-for="MapUrl" class="form-control" />
+    <br />
+    <button class="btn btn-outline-primary">Kaydet</button>
+</form>
+

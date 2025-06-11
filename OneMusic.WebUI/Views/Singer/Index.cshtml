@@ -1,0 +1,49 @@
+﻿@model List<Singer>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/UILayout/Index.cshtml";
+}
+
+<!-- ##### Breadcumb Area Start ##### -->
+<section class="breadcumb-area bg-img bg-overlay" style="background-image: url(/one-music-gh-pages/img/bg-img/breadcumb3.jpg);">
+    <div class="bradcumbContent">
+        <h2>Sanatçılar</h2>
+    </div>
+</section>
+<!-- ##### Breadcumb Area End ##### -->
+<!-- ##### Album Catagory Area Start ##### -->
+<section class="album-catagory section-padding-100-0">
+    <div class="container">
+
+        <!-- Arama Formu -->
+        <div class="row mb-4">
+            <div class="col-12 col-md-6 mx-auto">
+                <form method="get" asp-action="Index" asp-controller="Singer">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control form-control-lg" placeholder="Sanatçı adıyla ara...">
+                        <button class="btn btn-dark btn-lg" type="submit">Ara</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-12 col-sm-4 col-md-3 col-lg-2 single-album-item t c p">
+                    <div class="single-album">
+                        <a asp-controller="Singer" asp-action="SingerDetails" asp-route-id="@item.SingerId">
+                            <img src="@item.ImageUrl" class="img-fluid w-100" style="aspect-ratio: 1 / 1; object-fit: cover;" alt="@item.Name">
+                        </a>
+                        <div class="album-info">
+                            <a asp-controller="Singer" asp-action="SingerDetails" asp-route-id="@item.SingerId">
+                                <h5>@item.Name</h5>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
