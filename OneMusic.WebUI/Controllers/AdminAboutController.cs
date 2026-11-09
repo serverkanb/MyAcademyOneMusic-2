@@ -21,8 +21,8 @@ namespace OneMusic.WebUI.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            TempData["username"]=user.Name + "" + user.SurName; // tempdata geçici olarak hafızaya alır ve bütün controllerlardean erişebiliyoruz
+            var user = await _userManager.GetUserAsync(User);
+            TempData["username"] = user == null ? "" : user.Name + " " + user.SurName; // tempdata geçici olarak hafızaya alır ve bütün controllerlardean erişebiliyoruz
             var values = _aboutService.TGetList();
             return View(values);
         }

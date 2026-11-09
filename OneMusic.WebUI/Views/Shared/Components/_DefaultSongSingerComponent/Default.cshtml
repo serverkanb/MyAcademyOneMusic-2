@@ -49,9 +49,13 @@
                                     <p>@song.SongName</p>
                                 </div>
                             </div>
-                            <audio preload="auto" controls>
-                                <source src="@song.SongUrl">
-                            </audio>
+                            <div class="d-flex align-items-center">
+                                <audio preload="auto" controls>
+                                    <source src="@song.SongUrl">
+                                </audio>
+                                <partial name="_FavoriteButton" model="song.SongId" />
+                                <partial name="_AddToPlaylistButton" model="song.SongId" />
+                            </div>
                         </div>
                     }
                 </div>

@@ -6,6 +6,7 @@ using OneMusic.EntityLayer.Entity;
 namespace OneMusic.WebUI.Controllers
 {
 
+    [Authorize(Roles = "Admin")]
     public class AdminContactController : Controller
     {
         private readonly IContactService _contactService;

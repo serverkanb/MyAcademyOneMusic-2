@@ -28,7 +28,7 @@ namespace OneMsuic.BusinessLayer.Concrete
            _songDal.Delete(id);
         }
 
-        public Song TGetById(int id)
+        public Song? TGetById(int id)
         {
             return _songDal.GetById(id);
         }
@@ -36,6 +36,12 @@ namespace OneMsuic.BusinessLayer.Concrete
         public List<Song> TGetList()
         {
            return  _songDal.GetList();
+        }
+
+        public Song? TGetArtistSong(int userId, int songId)
+        {
+            var song = _songDal.GetSongWithAlbum(songId);
+            return song != null && song.Album != null && song.Album.AppUserId == userId ? song : null;
         }
 
         public List<Song> TGetNewSongs()

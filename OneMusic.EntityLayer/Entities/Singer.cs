@@ -17,10 +17,10 @@ namespace OneMusic.EntityLayer.Entity
 
         public bool IsPopularArtist { get; set; } = false;
 
-        public List<Song> Songs { get; set; }
+        public List<Song>? Songs { get; set; }
 
         public int? AppUserId { get; set; } // Foreign Key olarak AppUserId eklendi
-        public AppUser AppUser { get; set; }
+        public AppUser? AppUser { get; set; }
 
     }
 }

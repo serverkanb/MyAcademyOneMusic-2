@@ -28,7 +28,7 @@ namespace OneMusic.BusinessLayer.Concrete
             _contactDal.Delete(id);
         }
 
-        public Contact TGetById(int id)
+        public Contact? TGetById(int id)
         {
             return _contactDal.GetById(id);
         }

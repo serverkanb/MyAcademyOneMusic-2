@@ -49,7 +49,7 @@ namespace OneMusic.WebUI.Controllers
             var singerList = _singerService.TGetList();
             ViewBag.singers = new SelectList(singerList, "SingerId", "Name");
             var categoryList = _categoryService.TGetList();
-            ViewBag.category = new SelectList(categoryList, "CategoryId", "Name");
+            ViewBag.categories = new SelectList(categoryList, "CategoryId", "CategoryName");
 
             return View();
         }
@@ -76,6 +76,10 @@ namespace OneMusic.WebUI.Controllers
         public IActionResult UpdateAlbum(int id)
         {
             var album = _albumService.TGetById(id);
+            if (album == null)
+            {
+                return NotFound();
+            }
 
             var singerList = _singerService.TGetList();
             ViewBag.singers = new SelectList(singerList, "SingerId", "Name", album.SingerId);

@@ -12,10 +12,10 @@ namespace OneMusic.DataAccessLayer.Context
 {
     public class OneMusicContext : IdentityDbContext<AppUser,AppRole,int> // primary Key int değerdir dedik
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        // Bağlantı cümlesi artık appsettings.json -> ConnectionStrings:DefaultConnection içinden
+        // Program.cs'deki AddDbContext ile veriliyor.
+        public OneMusicContext(DbContextOptions<OneMusicContext> options) : base(options)
         {
-            optionsBuilder.UseSqlServer("server=LAPTOP-1IHFPICF;database=OneMusicDb-Re;trusted_connection=true;multipleactiveresultsets=true;trustservercertificate=true;");
-
         }
 
         public DbSet<About> Abouts { get; set; } 
@@ -30,6 +30,33 @@ namespace OneMusic.DataAccessLayer.Context
 
         public DbSet<Song> Songs { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<FavoriteSong> FavoriteSongs { get; set; }
+        public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<PlaylistSong> PlaylistSongs { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder); // Identity tabloları için gerekli
+
+            // Bir kullanıcı aynı şarkıyı sadece bir kez favoriye ekleyebilir
+            builder.Entity<FavoriteSong>()
+                .HasIndex(x => new { x.AppUserId, x.SongId })
+                .IsUnique();
+
+            builder.Entity<Playlist>()
+                .Property(x => x.Name)
+                .HasMaxLength(100);
+
+            builder.Entity<Playlist>()
+                .Property(x => x.Description)
+                .HasMaxLength(500);
+
+            // Aynı şarkı bir listeye sadece bir kez eklenebilir
+            builder.Entity<PlaylistSong>()
+                .HasIndex(x => new { x.PlaylistId, x.SongId })
+                .IsUnique();
+        }
 
 
     }

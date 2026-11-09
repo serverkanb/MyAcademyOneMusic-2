@@ -16,6 +16,7 @@ namespace OneMusic.DataAccessLayer.Abstract
 
 
         List<Song> GetNewSongs();
+        Song? GetSongWithAlbum(int id); // sahiplik kontrolü için albümüyle birlikte
 
     }
 }

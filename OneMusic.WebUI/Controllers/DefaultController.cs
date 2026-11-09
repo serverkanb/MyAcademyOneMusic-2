@@ -43,6 +43,11 @@ namespace OneMusic.WebUI.Controllers
         [HttpPost]
         public IActionResult SendMessage(Message message)
         {
+            if (string.IsNullOrWhiteSpace(message.Name) || string.IsNullOrWhiteSpace(message.Email) ||
+                string.IsNullOrWhiteSpace(message.Subject) || string.IsNullOrWhiteSpace(message.Content))
+            {
+                return BadRequest("Lütfen tüm alanları doldurunuz.");
+            }
             _messageService.TCreate(message);
             return NoContent();
         }

@@ -32,6 +32,11 @@ namespace OneMusic.DataAccessLayer.Concrete
             return _contex.Songs.Include(x => x.Album).Include(x=>x.Singer).Include(x=>x.Singer).ToList();
         }
 
+        public Song? GetSongWithAlbum(int id)
+        {
+            return _contex.Songs.Include(x => x.Album).FirstOrDefault(x => x.SongId == id);
+        }
+
         public List<Song> GetSongsWithAlbumByUserId(int id)
         {
             return _contex.Songs.Include(x=>x.Album).ThenInclude(x=>x.AppUser).Where(x=>x.Album.AppUserId==id).ToList();

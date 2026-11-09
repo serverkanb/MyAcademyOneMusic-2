@@ -15,8 +15,9 @@ namespace OneMusic.WebUI.ViewComponents.AdminLayout
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            ViewBag.username = user.Name + " " + user.SurName;
+            var name = User.Identity?.Name;
+            var user = name == null ? null : await _userManager.FindByNameAsync(name);
+            ViewBag.username = user == null ? "" : user.Name + " " + user.SurName;
             return View();
         }
     }

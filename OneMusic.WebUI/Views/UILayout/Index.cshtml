@@ -24,10 +24,13 @@
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="~/one-music-gh-pages/style.css">
+    <link rel="stylesheet" href="~/css/onemusic-custom.css" asp-append-version="true">
 
 </head>
 
 <body>
+    @* Favori butonlarının POST isteği için güvenlik anahtarı *@
+    @Html.AntiForgeryToken()
     <!-- Preloader -->
     <div class="preloader d-flex align-items-center justify-content-center">
         <div class="lds-ellipsis">
@@ -72,6 +75,11 @@
                                     <li>@Html.ActionLink("Sanatçılar", "Index", "Singer")</li>
                                     <li><a href="event.html">Etkinlikler</a></li>
                                     <li>@Html.ActionLink("İletişim","Index","Contact")</li>
+                                    @if (SignInManager.IsSignedIn(User))
+                                    {
+                                        <li><a href="/Favorite/Index"><i class="fa fa-heart" aria-hidden="true"></i> Favori Müziklerim</a></li>
+                                        <li><a href="/Playlist/Index"><i class="fa fa-list" aria-hidden="true"></i> Çalma Listelerim</a></li>
+                                    }
 
                                     @* Artist için özel menü öğeleri *@
                                     @if (ViewBag.IsArtist == true)
@@ -159,6 +167,195 @@
     <script src="~/one-music-gh-pages/js/active.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <!-- Çalma listesine ekle penceresi -->
+        <div class="modal fade" id="playlistModal" tabindex="-1" role="dialog" aria-labelledby="playlistModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="playlistModalTitle">Çalma listesine ekle</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Kapat"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="playlistOptions"></div>
+                        <div class="playlist-status" id="playlistStatus" role="status" aria-live="polite"></div>
+                        <form id="newPlaylistForm" class="mt-3">
+                            <label for="newPlaylistName" class="small mb-1">Yeni liste oluştur ve ekle</label>
+                            <div class="input-group">
+                                <input type="text" id="newPlaylistName" class="form-control" maxlength="100" placeholder="Liste adı" required />
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-dark">Oluştur</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="/Playlist/Index" class="mr-auto small">Çalma Listelerime git</a>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Tamam</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Şarkının yanındaki (+) butonu: kullanıcının listelerini gösterir, tek tıkla ekler/çıkarır
+            (function () {
+                var currentSongId = null;
+                var optionsEl = document.getElementById("playlistOptions");
+                var statusEl = document.getElementById("playlistStatus");
+
+                function token() {
+                    return document.querySelector('input[name="__RequestVerificationToken"]').value;
+                }
+                function post(url, data) {
+                    data.__RequestVerificationToken = token();
+                    return fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams(data).toString()
+                    });
+                }
+                function setStatus(text) { statusEl.textContent = text || ""; }
+
+                function render(playlists) {
+                    optionsEl.innerHTML = "";
+                    if (!playlists.length) {
+                        var empty = document.createElement("p");
+                        empty.className = "text-muted mb-0";
+                        empty.textContent = "Henüz bir çalma listen yok. Aşağıdan ilkini oluştur.";
+                        optionsEl.appendChild(empty);
+                        return;
+                    }
+                    playlists.forEach(function (p) {
+                        var btn = document.createElement("button");
+                        btn.type = "button";
+                        btn.className = "playlist-option" + (p.containsSong ? " selected" : "");
+                        btn.setAttribute("aria-pressed", p.containsSong ? "true" : "false");
+
+                        var left = document.createElement("span");
+                        var name = document.createElement("strong");
+                        name.textContent = p.name; // textContent: kullanıcı girdisi HTML olarak yorumlanmaz
+                        var meta = document.createElement("div");
+                        meta.className = "meta";
+                        meta.textContent = p.songCount + " şarkı";
+                        left.appendChild(name); left.appendChild(meta);
+
+                        var state = document.createElement("i");
+                        state.className = "state fa " + (p.containsSong ? "fa-check-circle" : "fa-circle-thin");
+                        state.setAttribute("aria-hidden", "true");
+
+                        btn.appendChild(left); btn.appendChild(state);
+                        btn.addEventListener("click", function () { toggle(p, btn, meta, state); });
+                        optionsEl.appendChild(btn);
+                    });
+                }
+
+                function load() {
+                    setStatus("Yükleniyor...");
+                    fetch("/Playlist/ForSong?songId=" + encodeURIComponent(currentSongId))
+                        .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+                        .then(function (data) { setStatus(""); render(data); })
+                        .catch(function () { setStatus("Listeler yüklenemedi."); });
+                }
+
+                function toggle(p, btn, meta, state) {
+                    btn.disabled = true;
+                    post("/Playlist/ToggleSong", { playlistId: p.id, songId: currentSongId })
+                        .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+                        .then(function (data) {
+                            p.containsSong = data.inPlaylist;
+                            p.songCount += data.inPlaylist ? 1 : -1;
+                            btn.classList.toggle("selected", data.inPlaylist);
+                            btn.setAttribute("aria-pressed", data.inPlaylist ? "true" : "false");
+                            state.className = "state fa " + (data.inPlaylist ? "fa-check-circle" : "fa-circle-thin");
+                            meta.textContent = p.songCount + " şarkı";
+                            setStatus(data.inPlaylist ? "“" + p.name + "” listesine eklendi." : "“" + p.name + "” listesinden çıkarıldı.");
+                        })
+                        .catch(function () { setStatus("İşlem yapılamadı, tekrar deneyin."); })
+                        .finally(function () { btn.disabled = false; });
+                }
+
+                document.getElementById("newPlaylistForm").addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    var input = document.getElementById("newPlaylistName");
+                    var name = input.value.trim();
+                    if (!name) return;
+                    post("/Playlist/CreateWithSong", { name: name, songId: currentSongId })
+                        .then(function (r) {
+                            if (!r.ok) return r.text().then(function (t) { throw new Error(t); });
+                            return r.json();
+                        })
+                        .then(function (data) {
+                            input.value = "";
+                            load();
+                            setTimeout(function () { setStatus("“" + data.name + "” oluşturuldu ve şarkı eklendi."); }, 300);
+                        })
+                        .catch(function (err) { setStatus(err.message || "Liste oluşturulamadı."); });
+                });
+
+                document.addEventListener("click", function (e) {
+                    var btn = e.target.closest("button.playlist-add-btn");
+                    if (!btn) return;
+                    currentSongId = btn.dataset.songId;
+                    optionsEl.innerHTML = "";
+                    $("#playlistModal").modal("show");
+                    load();
+                });
+            })();
+        </script>
+    }
+
+    <script>
+        // Kalbe tıklanınca şarkıyı favorilere ekler / çıkarır (sayfa yenilenmeden)
+        document.addEventListener("click", function (e) {
+            var btn = e.target.closest("button.favorite-btn");
+            if (!btn) return;
+
+            var songId = btn.dataset.songId;
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            btn.disabled = true;
+
+            fetch("/Favorite/Toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "songId=" + encodeURIComponent(songId) + "&__RequestVerificationToken=" + encodeURIComponent(token)
+            })
+                .then(function (response) {
+                    if (!response.ok) throw new Error();
+                    return response.json();
+                })
+                .then(function (data) {
+                    // Aynı şarkı sayfada birden fazla yerde olabilir, hepsini güncelle
+                    document.querySelectorAll('button.favorite-btn[data-song-id="' + songId + '"]').forEach(function (b) {
+                        b.classList.toggle("active", data.isFavorite);
+                        b.setAttribute("aria-pressed", data.isFavorite ? "true" : "false");
+                        b.title = data.isFavorite ? "Favorilerden çıkar" : "Favorilere ekle";
+                        var icon = b.querySelector("i");
+                        icon.className = "fa " + (data.isFavorite ? "fa-heart" : "fa-heart-o");
+                        b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+                    });
+
+                    // Favori Müziklerim sayfasındaysak çıkarılan şarkıyı listeden kaldır
+                    if (!data.isFavorite) {
+                        var row = document.querySelector('[data-favorite-row="' + songId + '"]');
+                        if (row) {
+                            row.remove();
+                            if (!document.querySelector("[data-favorite-row]")) {
+                                document.getElementById("favoriteEmpty").style.display = "";
+                            }
+                        }
+                    }
+                })
+                .catch(function () {
+                    Swal.fire({ title: "Hata", text: "İşlem yapılamadı, lütfen tekrar deneyin.", icon: "error", confirmButtonText: "Tamam" });
+                })
+                .finally(function () {
+                    btn.disabled = false;
+                });
+        });
+    </script>
 </body>
 
 </html>

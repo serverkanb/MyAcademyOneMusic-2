@@ -30,13 +30,17 @@ namespace OneMusic.DataAccessLayer.Repositories
         public void Delete(int id)
         {
             var value = _context.Set<T>().Find(id);
+            if (value == null)
+            {
+                return; // silinecek kayıt bulunamadı
+            }
             _context.Set<T>().Remove(value);
             _context.SaveChanges();
 
         }
 
        
-        public T GetById(int id)
+        public T? GetById(int id)
         {
             return _context.Set<T>().Find(id);
         }

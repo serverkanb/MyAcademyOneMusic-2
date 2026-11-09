@@ -1,0 +1,65 @@
+@model List<FavoriteSong>
+@{
+    ViewData["Title"] = "Favori Müziklerim";
+    Layout = "~/Views/UILayout/Index.cshtml";
+}
+
+<!-- ##### Breadcumb Area Start ##### -->
+<section class="breadcumb-area bg-img bg-overlay" style="background-image: url(/one-music-gh-pages/img/bg-img/breadcumb3.jpg);">
+    <div class="bradcumbContent">
+        <p>Beğendiğin şarkılar burada</p>
+        <h2>Favori Müziklerim</h2>
+    </div>
+</section>
+<!-- ##### Breadcumb Area End ##### -->
+
+<section class="section-padding-100">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <ul class="list-group favorite-list" id="favoriteList">
+                    @foreach (var item in Model)
+                    {
+                        var song = item.Song!;
+                        var singerName = song.Singer?.Name ?? song.Album?.Singer?.Name;
+                        <li class="list-group-item d-flex align-items-center justify-content-between flex-wrap" data-favorite-row="@song.SongId">
+                            <div class="d-flex align-items-center me-3">
+                                @if (!string.IsNullOrEmpty(song.Album?.CoverImage))
+                                {
+                                    <img src="@song.Album.CoverImage" alt="" class="playlist-cover" />
+                                }
+                                <div>
+                                    <strong>@song.SongName</strong>
+                                    <div class="text-muted small">
+                                        @singerName
+                                        @if (song.Album != null)
+                                        {
+                                            <span> · <a href="/Albums/AlbumDetail/@song.AlbumId" class="small-link">@song.Album.AlbumName</a></span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                @if (!string.IsNullOrEmpty(song.SongUrl))
+                                {
+                                    <audio controls preload="none" style="margin-right:10px">
+                                        <source src="@song.SongUrl" />
+                                    </audio>
+                                }
+                                <partial name="_FavoriteButton" model="song.SongId" />
+                                <partial name="_AddToPlaylistButton" model="song.SongId" />
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <div id="favoriteEmpty" class="text-center py-5" style="@(Model.Any() ? "display:none" : "")">
+                    <i class="fa fa-heart-o" style="font-size:48px;color:#ccc" aria-hidden="true"></i>
+                    <h5 class="mt-3">Henüz favori şarkın yok</h5>
+                    <p>Şarkıların yanındaki kalbe tıklayarak favorilerine ekleyebilirsin.</p>
+                    <a href="/Albums/Index" class="btn oneMusic-btn mt-3">Albümlere Göz At</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -12,6 +12,6 @@ namespace OneMusic.EntityLayer.Entities
 
         public string CategoryName {  get; set; }
 
-        public List<Album>  Albums { get; set; }
+        public List<Album>? Albums { get; set; }
     }
 }

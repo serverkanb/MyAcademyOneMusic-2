@@ -1,0 +1,31 @@
+@model List<Category>
+@{
+    ViewData["Title"] = "Kategoriler";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+    int count = 0;
+}
+
+<h3>Kategoriler</h3>
+
+<table class="table table-bordered table-hover">
+    <tr>
+        <th>#</th>
+        <th>Kategori Adı</th>
+        <th>İşlemler</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        count++;
+        <tr>
+            <th>@count</th>
+            <td>@item.CategoryName</td>
+            <td>
+                <a class="btn btn-outline-danger" asp-action="DeleteCategory" asp-route-id="@item.CategoryId" onclick="return confirm('Kategori silinsin mi?')">Sil</a>
+                <a class="btn btn-outline-info" asp-action="UpdateCategory" asp-route-id="@item.CategoryId">Güncelle</a>
+            </td>
+        </tr>
+    }
+</table>
+
+<a class="btn btn-outline-primary" asp-action="CreateCategory">Yeni Kategori Ekle</a>

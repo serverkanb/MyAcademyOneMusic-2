@@ -9,7 +9,7 @@ namespace OneMsuic.BusinessLayer.Abstract
     public interface IGenericService<T> where T : class
     {
         List<T> TGetList();
-        T TGetById(int id);
+        T? TGetById(int id);
 
         void TCreate(T entity);
 

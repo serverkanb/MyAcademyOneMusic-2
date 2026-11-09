@@ -1,0 +1,20 @@
+@model int
+@*
+    Şarkının yanındaki "çalma listesine ekle" butonu.
+    Kullanım: <partial name="_AddToPlaylistButton" model="song.SongId" />
+    Tıklanınca UILayout içindeki çalma listesi penceresi açılır. Giriş yapılmamışsa login sayfasına götürür.
+*@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <button type="button" class="playlist-add-btn" data-song-id="@Model" title="Çalma listesine ekle" aria-label="Çalma listesine ekle">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+    </button>
+}
+else
+{
+    <a class="playlist-add-btn"
+       href="/Login/Index?returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)"
+       title="Çalma listesine eklemek için giriş yapın">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+    </a>
+}

@@ -1,0 +1,163 @@
+@model Playlist
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "~/Views/UILayout/Index.cshtml";
+    var songs = Model.PlaylistSongs ?? new List<PlaylistSong>();
+}
+
+<!-- ##### Breadcumb Area Start ##### -->
+<section class="breadcumb-area bg-img bg-overlay" style="background-image: url(/one-music-gh-pages/img/bg-img/breadcumb2.jpg);">
+    <div class="bradcumbContent">
+        <p>Çalma Listesi · @songs.Count şarkı</p>
+        <h2>@Model.Name</h2>
+    </div>
+</section>
+<!-- ##### Breadcumb Area End ##### -->
+
+<section class="section-padding-100">
+    <div class="container">
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-30">
+            <div class="mb-2">
+                <a href="/Playlist/Index"><i class="fa fa-angle-left" aria-hidden="true"></i> Çalma Listelerim</a>
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <p class="mt-2 mb-0">@Model.Description</p>
+                }
+            </div>
+            <div class="mb-2">
+                @if (songs.Any(x => !string.IsNullOrEmpty(x.Song?.SongUrl)))
+                {
+                    <button type="button" id="playAllBtn" class="btn oneMusic-btn mr-2"><i class="fa fa-play" aria-hidden="true"></i> Tümünü Çal</button>
+                }
+                <button type="button" class="btn btn-outline-secondary" data-toggle="collapse" data-target="#editPlaylist" aria-expanded="false" aria-controls="editPlaylist">
+                    <i class="fa fa-pencil" aria-hidden="true"></i> Düzenle
+                </button>
+            </div>
+        </div>
+
+        @if (TempData["playlistError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["playlistError"]</div>
+        }
+
+        <!-- Düzenle / sil -->
+        <div class="collapse mb-30" id="editPlaylist">
+            <div class="playlist-create">
+                <form asp-action="Update" method="post" class="form-row align-items-end">
+                    <input type="hidden" name="PlaylistId" value="@Model.PlaylistId" />
+                    <div class="col-md-4 mb-2">
+                        <label for="editName" class="small mb-1">Liste adı</label>
+                        <input id="editName" type="text" name="Name" value="@Model.Name" class="form-control" maxlength="100" required />
+                    </div>
+                    <div class="col-md-5 mb-2">
+                        <label for="editDescription" class="small mb-1">Açıklama</label>
+                        <input id="editDescription" type="text" name="Description" value="@Model.Description" class="form-control" maxlength="500" />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="submit" class="btn btn-primary btn-block">Kaydet</button>
+                    </div>
+                </form>
+                <form asp-action="Delete" asp-route-id="@Model.PlaylistId" method="post" class="mt-2" onsubmit="return confirm('“@Model.Name” listesi silinsin mi? Şarkılar silinmez, sadece liste silinir.')">
+                    <button type="submit" class="btn btn-link text-danger p-0"><i class="fa fa-trash" aria-hidden="true"></i> Listeyi sil</button>
+                </form>
+            </div>
+        </div>
+
+        @if (songs.Any())
+        {
+            <ul class="list-group" id="playlistSongs">
+                @{ var index = 0; }
+                @foreach (var item in songs)
+                {
+                    var song = item.Song!;
+                    index++;
+                    var singerName = song.Singer?.Name ?? song.Album?.Singer?.Name;
+                    <li class="list-group-item d-flex align-items-center justify-content-between flex-wrap playlist-song">
+                        <div class="d-flex align-items-center mr-3 mb-2 mb-md-0">
+                            <span class="playlist-index">@index</span>
+                            @if (!string.IsNullOrEmpty(song.Album?.CoverImage))
+                            {
+                                <img src="@song.Album.CoverImage" alt="" class="playlist-cover" />
+                            }
+                            <div>
+                                <strong>@song.SongName</strong>
+                                <div class="text-muted small">
+                                    @singerName
+                                    @if (song.Album != null)
+                                    {
+                                        <span> · <a class="small-link" href="/Albums/AlbumDetail/@song.AlbumId">@song.Album.AlbumName</a></span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            @if (!string.IsNullOrEmpty(song.SongUrl))
+                            {
+                                <audio controls preload="none" class="playlist-audio mr-2">
+                                    <source src="@song.SongUrl" />
+                                </audio>
+                            }
+                            <partial name="_FavoriteButton" model="song.SongId" />
+                            <form asp-action="RemoveSong" method="post" class="d-inline">
+                                <input type="hidden" name="playlistId" value="@Model.PlaylistId" />
+                                <input type="hidden" name="songId" value="@song.SongId" />
+                                <button type="submit" class="playlist-remove-btn" title="Listeden çıkar" aria-label="@song.SongName şarkısını listeden çıkar">
+                                    <i class="fa fa-times" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fa fa-music" style="font-size:48px;color:#ccc" aria-hidden="true"></i>
+                <h5 class="mt-3">Bu liste henüz boş</h5>
+                <p>Şarkıların yanındaki <i class="fa fa-plus" aria-hidden="true"></i> butonuyla bu listeye şarkı ekleyebilirsin.</p>
+                <a href="/Albums/Index" class="btn oneMusic-btn mt-3">Albümlere Göz At</a>
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    // "Tümünü Çal": şarkıları sırayla çalar, biri bitince sıradakine geçer.
+    // Not: Tema (active.js) sayfa yüklenince <audio> etiketlerini klonlayıp değiştirdiği için
+    // olayları liste üzerinde "capture" ile yakalıyor ve oynatıcıları her seferinde yeniden buluyoruz.
+    (function () {
+        var list = document.getElementById("playlistSongs");
+        var btn = document.getElementById("playAllBtn");
+        if (!list) return;
+
+        function players() {
+            return Array.prototype.slice.call(list.querySelectorAll("audio"));
+        }
+
+        // Bir şarkı başlayınca diğerlerini durdur ve çalan satırı vurgula
+        list.addEventListener("play", function (e) {
+            var current = e.target;
+            players().forEach(function (other) { if (other !== current) other.pause(); });
+            list.querySelectorAll(".playlist-song").forEach(function (li) { li.classList.remove("now-playing"); });
+            var row = current.closest(".playlist-song");
+            if (row) row.classList.add("now-playing");
+        }, true);
+
+        // Bitince sıradakini çal
+        list.addEventListener("ended", function (e) {
+            var all = players();
+            var next = all[all.indexOf(e.target) + 1];
+            if (next) { next.currentTime = 0; next.play(); }
+        }, true);
+
+        if (btn) {
+            btn.addEventListener("click", function () {
+                var all = players();
+                all.forEach(function (p) { p.pause(); p.currentTime = 0; });
+                if (all.length) all[0].play();
+            });
+        }
+    })();
+</script>

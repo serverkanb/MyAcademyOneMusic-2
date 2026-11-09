@@ -14,6 +14,9 @@ namespace OneMsuic.BusinessLayer.Abstract
         List<Song> TGetSongsWithAlbumByUserId(int id);
 
         List<Song> TGetNewSongs();
+
+        // Şarkı bu sanatçının (kullanıcının) albümüne ait değilse null döner
+        Song? TGetArtistSong(int userId, int songId);
     }
 }
  

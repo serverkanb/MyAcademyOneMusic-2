@@ -1,0 +1,25 @@
+@model int
+@inject OneMusic.WebUI.Services.FavoriteState Favorites
+@*
+    Şarkının yanındaki kalp butonu. Kullanım: <partial name="_FavoriteButton" model="song.SongId" />
+    Giriş yapılmamışsa login sayfasına götürür.
+*@
+@if (Favorites.IsSignedIn)
+{
+    var isFavorite = Favorites.IsFavorite(Model);
+    <button type="button"
+            class="favorite-btn @(isFavorite ? "active" : "")"
+            data-song-id="@Model"
+            aria-pressed="@(isFavorite ? "true" : "false")"
+            title="@(isFavorite ? "Favorilerden çıkar" : "Favorilere ekle")">
+        <i class="fa @(isFavorite ? "fa-heart" : "fa-heart-o")" aria-hidden="true"></i>
+    </button>
+}
+else
+{
+    <a class="favorite-btn"
+       href="/Login/Index?returnUrl=@Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString)"
+       title="Favorilere eklemek için giriş yapın">
+        <i class="fa fa-heart-o" aria-hidden="true"></i>
+    </a>
+}
