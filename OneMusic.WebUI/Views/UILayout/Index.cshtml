@@ -24,10 +24,30 @@
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="~/one-music-gh-pages/style.css">
+    <style>
+        /* Favori (kalp) butonu */
+        .favorite-btn {
+            background: none;
+            border: none;
+            padding: 6px 8px;
+            font-size: 22px;
+            line-height: 1;
+            color: #9e9e9e;
+            cursor: pointer;
+            transition: transform .15s ease, color .15s ease;
+        }
+        .favorite-btn:hover { color: #e63946; transform: scale(1.15); }
+        .favorite-btn.active { color: #e63946; }
+        .favorite-btn:focus-visible { outline: 2px solid #e63946; outline-offset: 2px; border-radius: 4px; }
+        .favorite-btn.pop { animation: favorite-pop .3s ease; }
+        @@keyframes favorite-pop { 50% { transform: scale(1.35); } }
+    </style>
 
 </head>
 
 <body>
+    @* Favori butonlarının POST isteği için güvenlik anahtarı *@
+    @Html.AntiForgeryToken()
     <!-- Preloader -->
     <div class="preloader d-flex align-items-center justify-content-center">
         <div class="lds-ellipsis">
@@ -72,6 +92,10 @@
                                     <li>@Html.ActionLink("Sanatçılar", "Index", "Singer")</li>
                                     <li><a href="event.html">Etkinlikler</a></li>
                                     <li>@Html.ActionLink("İletişim","Index","Contact")</li>
+                                    @if (SignInManager.IsSignedIn(User))
+                                    {
+                                        <li><a href="/Favorite/Index"><i class="fa fa-heart" aria-hidden="true"></i> Favori Müziklerim</a></li>
+                                    }
 
                                     @* Artist için özel menü öğeleri *@
                                     @if (ViewBag.IsArtist == true)
@@ -159,6 +183,56 @@
     <script src="~/one-music-gh-pages/js/active.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Kalbe tıklanınca şarkıyı favorilere ekler / çıkarır (sayfa yenilenmeden)
+        document.addEventListener("click", function (e) {
+            var btn = e.target.closest("button.favorite-btn");
+            if (!btn) return;
+
+            var songId = btn.dataset.songId;
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            btn.disabled = true;
+
+            fetch("/Favorite/Toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "songId=" + encodeURIComponent(songId) + "&__RequestVerificationToken=" + encodeURIComponent(token)
+            })
+                .then(function (response) {
+                    if (!response.ok) throw new Error();
+                    return response.json();
+                })
+                .then(function (data) {
+                    // Aynı şarkı sayfada birden fazla yerde olabilir, hepsini güncelle
+                    document.querySelectorAll('button.favorite-btn[data-song-id="' + songId + '"]').forEach(function (b) {
+                        b.classList.toggle("active", data.isFavorite);
+                        b.setAttribute("aria-pressed", data.isFavorite ? "true" : "false");
+                        b.title = data.isFavorite ? "Favorilerden çıkar" : "Favorilere ekle";
+                        var icon = b.querySelector("i");
+                        icon.className = "fa " + (data.isFavorite ? "fa-heart" : "fa-heart-o");
+                        b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+                    });
+
+                    // Favori Müziklerim sayfasındaysak çıkarılan şarkıyı listeden kaldır
+                    if (!data.isFavorite) {
+                        var row = document.querySelector('[data-favorite-row="' + songId + '"]');
+                        if (row) {
+                            row.remove();
+                            if (!document.querySelector("[data-favorite-row]")) {
+                                document.getElementById("favoriteEmpty").style.display = "";
+                            }
+                        }
+                    }
+                })
+                .catch(function () {
+                    Swal.fire({ title: "Hata", text: "İşlem yapılamadı, lütfen tekrar deneyin.", icon: "error", confirmButtonText: "Tamam" });
+                })
+                .finally(function () {
+                    btn.disabled = false;
+                });
+        });
+    </script>
 </body>
 
 </html>

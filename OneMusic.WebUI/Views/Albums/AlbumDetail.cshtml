@@ -26,11 +26,14 @@
                 <ul class="list-group">
                     @foreach (var song in Model.Songs)
                     {
-                        <li class="list-group-item d-flex align-items-center">
+                        <li class="list-group-item d-flex align-items-center justify-content-between">
                             <span class="me-3">@song.SongName</span>
-                            <audio controls>
-                                <source src="@song.SongUrl" />
-                            </audio>
+                            <div class="d-flex align-items-center">
+                                <audio controls>
+                                    <source src="@song.SongUrl" />
+                                </audio>
+                                <partial name="_FavoriteButton" model="song.SongId" />
+                            </div>
                         </li>
                     }
                 </ul>

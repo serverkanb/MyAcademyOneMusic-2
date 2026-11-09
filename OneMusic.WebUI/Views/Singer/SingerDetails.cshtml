@@ -51,9 +51,12 @@
                     {
                         <li class="list-group-item d-flex align-items-center justify-content-between">
                             <span>@song.SongName</span>
-                            <audio controls>
-                                <source src="@song.SongUrl" />
-                            </audio>
+                            <div class="d-flex align-items-center">
+                                <audio controls>
+                                    <source src="@song.SongUrl" />
+                                </audio>
+                                <partial name="_FavoriteButton" model="song.SongId" />
+                            </div>
                         </li>
                     }
                 </ul>
