@@ -32,6 +32,8 @@ namespace OneMusic.DataAccessLayer.Context
         public DbSet<Category> Categories { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<FavoriteSong> FavoriteSongs { get; set; }
+        public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<PlaylistSong> PlaylistSongs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -40,6 +42,19 @@ namespace OneMusic.DataAccessLayer.Context
             // Bir kullanıcı aynı şarkıyı sadece bir kez favoriye ekleyebilir
             builder.Entity<FavoriteSong>()
                 .HasIndex(x => new { x.AppUserId, x.SongId })
+                .IsUnique();
+
+            builder.Entity<Playlist>()
+                .Property(x => x.Name)
+                .HasMaxLength(100);
+
+            builder.Entity<Playlist>()
+                .Property(x => x.Description)
+                .HasMaxLength(500);
+
+            // Aynı şarkı bir listeye sadece bir kez eklenebilir
+            builder.Entity<PlaylistSong>()
+                .HasIndex(x => new { x.PlaylistId, x.SongId })
                 .IsUnique();
         }
 

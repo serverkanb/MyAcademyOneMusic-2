@@ -323,6 +323,63 @@ namespace OneMusic.DataAccessLayer.Migrations
                     b.ToTable("FavoriteSongs");
                 });
 
+            modelBuilder.Entity("OneMusic.EntityLayer.Entities.Playlist", b =>
+                {
+                    b.Property<int>("PlaylistId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlaylistId"));
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("PlaylistId");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("Playlists");
+                });
+
+            modelBuilder.Entity("OneMusic.EntityLayer.Entities.PlaylistSong", b =>
+                {
+                    b.Property<int>("PlaylistSongId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PlaylistSongId"));
+
+                    b.Property<DateTime>("AddedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PlaylistId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SongId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PlaylistSongId");
+
+                    b.HasIndex("SongId");
+
+                    b.HasIndex("PlaylistId", "SongId")
+                        .IsUnique();
+
+                    b.ToTable("PlaylistSongs");
+                });
+
             modelBuilder.Entity("OneMusic.EntityLayer.Entity.About", b =>
                 {
                     b.Property<int>("AboutId")
@@ -589,6 +646,36 @@ namespace OneMusic.DataAccessLayer.Migrations
                     b.Navigation("Song");
                 });
 
+            modelBuilder.Entity("OneMusic.EntityLayer.Entities.Playlist", b =>
+                {
+                    b.HasOne("OneMusic.EntityLayer.Entities.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("OneMusic.EntityLayer.Entities.PlaylistSong", b =>
+                {
+                    b.HasOne("OneMusic.EntityLayer.Entities.Playlist", "Playlist")
+                        .WithMany("PlaylistSongs")
+                        .HasForeignKey("PlaylistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OneMusic.EntityLayer.Entity.Song", "Song")
+                        .WithMany()
+                        .HasForeignKey("SongId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Playlist");
+
+                    b.Navigation("Song");
+                });
+
             modelBuilder.Entity("OneMusic.EntityLayer.Entity.Singer", b =>
                 {
                     b.HasOne("OneMusic.EntityLayer.Entities.AppUser", "AppUser")
@@ -630,6 +717,11 @@ namespace OneMusic.DataAccessLayer.Migrations
             modelBuilder.Entity("OneMusic.EntityLayer.Entities.Category", b =>
                 {
                     b.Navigation("Albums");
+                });
+
+            modelBuilder.Entity("OneMusic.EntityLayer.Entities.Playlist", b =>
+                {
+                    b.Navigation("PlaylistSongs");
                 });
 
             modelBuilder.Entity("OneMusic.EntityLayer.Entity.Singer", b =>

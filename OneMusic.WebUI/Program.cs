@@ -51,6 +51,9 @@ builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<IFavoriteSongDal, EfFavoriteSongDal>();
 builder.Services.AddScoped<IFavoriteSongService, FavoriteSongManager>();
 
+builder.Services.AddScoped<IPlaylistDal, EfPlaylistDal>();
+builder.Services.AddScoped<IPlaylistService, PlaylistManager>();
+
 // Favori kalp butonları için (view'larda giriş yapan kullanıcının favorilerini okur)
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<OneMusic.WebUI.Services.FavoriteState>();

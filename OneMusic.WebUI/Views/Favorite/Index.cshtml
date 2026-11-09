@@ -34,7 +34,7 @@
                                         @singerName
                                         @if (song.Album != null)
                                         {
-                                            <span> · <a href="/Albums/AlbumDetail/@song.AlbumId" style="font-size:inherit;font-weight:normal;color:inherit;text-decoration:underline">@song.Album.AlbumName</a></span>
+                                            <span> · <a href="/Albums/AlbumDetail/@song.AlbumId" class="small-link">@song.Album.AlbumName</a></span>
                                         }
                                     </div>
                                 </div>
@@ -47,6 +47,7 @@
                                     </audio>
                                 }
                                 <partial name="_FavoriteButton" model="song.SongId" />
+                                <partial name="_AddToPlaylistButton" model="song.SongId" />
                             </div>
                         </li>
                     }
