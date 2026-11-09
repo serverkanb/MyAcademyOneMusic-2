@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using OneMsuic.BusinessLayer.Abstract;
 using OneMsuic.BusinessLayer.Concrete;
 using OneMsuic.BusinessLayer.Validators;
@@ -15,7 +17,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<OneMusicContext>().AddErrorDescriber<CustomErrrorDescriber>();// kayýt olurken ki hatalarý validatorda ezmiþtik onu buraya ekledik
+// BaÄŸlantÄ± cÃ¼mlesi appsettings.json -> ConnectionStrings:DefaultConnection
+builder.Services.AddDbContext<OneMusicContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddIdentity<AppUser, AppRole>().AddEntityFrameworkStores<OneMusicContext>().AddErrorDescriber<CustomErrrorDescriber>();// kayÄ±t olurken ki hatalarÄ± validatorda ezmiÅŸtik onu buraya ekledik
 
 builder.Services.AddScoped<IAboutDal, EfAboutDal> ();
 builder.Services.AddScoped<IAboutService, AboutManager> ();
@@ -45,26 +51,41 @@ builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddValidatorsFromAssemblyContaining<SingerValidator>();
 
 
-builder.Services.AddDbContext<OneMusicContext> ();
 builder.Services.AddControllersWithViews(option =>
 {
-    //Kullanýcý giriþi yapmamýþsa, sayfalara eriþimi engeller.
-    //Yetkilendirme gerektiren tüm istekleri otomatik olarak kontrol eder.
-//ASP.NET Core uygulamalarýnda global yetkilendirme filtresi olarak kullanýlýr.
+    //KullanÄ±cÄ± giriÅŸi yapmamÄ±ÅŸsa, sayfalara eriÅŸimi engeller.
+    //Yetkilendirme gerektiren tÃ¼m istekleri otomatik olarak kontrol eder.
+//ASP.NET Core uygulamalarÄ±nda global yetkilendirme filtresi olarak kullanÄ±lÄ±r.
     var authorizePolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-    //option.Filters.Add(new AuthorizeFilter(authorizePolicy)); 
+    //option.Filters.Add(new AuthorizeFilter(authorizePolicy));
 } );
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Login/Index";//giriþyapma yolu
-    options.AccessDeniedPath = "/ErrorPage/AccessDenied";//hata sayfasýnýn yolunu yazdýk 
-    options.LogoutPath = "/Login/Logout"; //çýkýþ yapma
- 
+    options.LoginPath = "/Login/Index";//giriÅŸyapma yolu
+    options.AccessDeniedPath = "/ErrorPage/AccessDenied";//hata sayfasÄ±nÄ±n yolunu yazdÄ±k
+    options.LogoutPath = "/Login/Logout"; //Ã§Ä±kÄ±ÅŸ yapma
+
 });
 
 var app = builder.Build();
+
+// Uygulama aÃ§Ä±lÄ±rken bekleyen migration'larÄ± uygular ve temel rolleri oluÅŸturur.
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<OneMusicContext>();
+    context.Database.Migrate();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+    foreach (var roleName in new[] { "Admin", "Artist", "Visitor" })
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new AppRole { Name = roleName });
+        }
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -74,7 +95,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/ErrorPage/Error404/", "?code{0}");
+app.UseStatusCodePagesWithReExecute("/ErrorPage/Error404/", "?code={0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -87,8 +108,8 @@ app.UseAuthorization();
 //    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 
-//areadan kopyaladýk 
-//buradailk açýlan sayfayý ayarlayabiliriz Home du Default index girdik
+//areadan kopyaladÄ±k
+//buradailk aÃ§Ä±lan sayfayÄ± ayarlayabiliriz Home du Default index girdik
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(

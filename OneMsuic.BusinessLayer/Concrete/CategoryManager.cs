@@ -28,7 +28,7 @@ namespace OneMsuic.BusinessLayer.Concrete
             _categoryDal.Delete(id);
         }
 
-        public Category TGetById(int id)
+        public Category? TGetById(int id)
         {
             return _categoryDal.GetById(id);
         }

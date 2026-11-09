@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OneMusic.EntityLayer.Entities;
@@ -13,15 +12,24 @@ namespace OneMusic.WebUI.Areas.Artist.Controllers
     public class ProfileController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProfileController(UserManager<AppUser> userManager)
+        public ProfileController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IWebHostEnvironment environment)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
+            _environment = environment;
         }
+
         [HttpGet]
-        public async  Task<IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Login", new { area = "" });
+            }
             var model = new ArtistEditViewModel()
             {
                 Name = user.Name,
@@ -33,61 +41,79 @@ namespace OneMusic.WebUI.Areas.Artist.Controllers
             };
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> Index(ArtistEditViewModel model)
         {
-            var user = await _userManager.FindByNameAsync(User.Identity?.Name);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Login", new { area = "" });
+            }
+            model.ImageUrl = user.ImageUrl; // hata durumunda mevcut resim görünmeye devam etsin
+
+            // Mevcut şifre doğru değilse hiçbir değişiklik yapılmaz
+            if (string.IsNullOrEmpty(model.OldPassword) || !await _userManager.CheckPasswordAsync(user, model.OldPassword))
+            {
+                ModelState.AddModelError("", "Mevcut Şifreniz Hatalı");
+                return View(model);
+            }
 
             if (model.ImageFile != null)
             {
-                var resource = Directory.GetCurrentDirectory();//kaynak
-                var extension = Path.GetExtension(model.ImageFile.FileName);//uzantı
+                var extension = Path.GetExtension(model.ImageFile.FileName).ToLower();//uzantı
                 if (extension != ".jpg" && extension != ".jpeg" && extension != ".png")
                 {
-                    // Desteklenmeyen dosya uzantısı hatası
                     ModelState.AddModelError("ImageFile", "Sadece Resim dosyaları kabul edilir.");
-                    // Gerekirse, işlemi sonlandırabilirsiniz.
                     return View(model);
                 }
-                var ImageName = Guid.NewGuid() + extension;
-                var savelocation = resource + "/wwwroot/Images/" + ImageName;
-                var stream = new FileStream(savelocation, FileMode.Create);
-                await model.ImageFile.CopyToAsync(stream);
-                user.ImageUrl = "/Images/" + ImageName;
+                var folder = Path.Combine(_environment.WebRootPath, "Images");
+                Directory.CreateDirectory(folder); // klasör yoksa oluşturur
+                var imageName = Guid.NewGuid() + extension;
+                using (var stream = new FileStream(Path.Combine(folder, imageName), FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+                user.ImageUrl = "/Images/" + imageName;
+            }
+
+            if (!string.IsNullOrEmpty(model.NewPassword))
+            {
+                if (model.NewPassword != model.ConfirmPassword)
+                {
+                    ModelState.AddModelError("", "Yeni şifreler uyuşmuyor");
+                    return View(model);
+                }
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                if (!changePasswordResult.Succeeded)
+                {
+                    foreach (var item in changePasswordResult.Errors)
+                    {
+                        ModelState.AddModelError("", item.Description);
+                    }
+                    return View(model);
+                }
             }
 
             user.Name = model.Name;
-            user.SurName=model.Surname;
+            user.SurName = model.Surname;
             user.Email = model.Email;
             user.PhoneNumber = model.PhoneNumber;
             user.UserName = model.UserName;
 
-
-            var result = await _userManager.CheckPasswordAsync(user, model.OldPassword);
-            if(result == true)
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
             {
-                if (model.NewPassword != null && model.ConfirmPassword == model.NewPassword)
+                foreach (var item in updateResult.Errors)
                 {
-                    var changePasswordResult = await _userManager.ChangePasswordAsync(user,model.OldPassword,model.NewPassword);
-                    if (!changePasswordResult.Succeeded)
-                    {
-                        foreach (var item in changePasswordResult.Errors)
-                        {
-                            ModelState.AddModelError("", item.Description);
-                            return View();
-                        }
-                    }
+                    ModelState.AddModelError("", item.Description);
                 }
-
-                var updateResult = await _userManager.UpdateAsync(user);
-                if (updateResult.Succeeded)
-                {
-                    return RedirectToAction("Index", "Login");
-                }
+                return View(model);
             }
 
-            ModelState.AddModelError("", "Mevcut Şifreniz Hatalı");
-            return View();
+            // Bilgiler değiştiği için oturumu kapatıp yeniden giriş istiyoruz
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Login", new { area = "" });
         }
     }
 }

@@ -6,6 +6,7 @@ using OneMusic.EntityLayer.Entities;
 namespace OneMusic.WebUI.Controllers
 {
 
+    [Authorize(Roles = "Admin")]
     public class AdminLayoutContrroller : Controller
     {
         private readonly UserManager<AppUser> _userManager;

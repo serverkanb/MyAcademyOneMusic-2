@@ -28,7 +28,7 @@ namespace OneMsuic.BusinessLayer.Concrete
            _songDal.Delete(id);
         }
 
-        public Song TGetById(int id)
+        public Song? TGetById(int id)
         {
             return _songDal.GetById(id);
         }

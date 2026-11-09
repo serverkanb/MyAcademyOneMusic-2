@@ -28,7 +28,7 @@ namespace OneMsuic.BusinessLayer.Concrete
             _aboutDal.Delete(id);
         }
 
-        public About TGetById(int id)
+        public About? TGetById(int id)
         {
              return _aboutDal.GetById(id);
         }

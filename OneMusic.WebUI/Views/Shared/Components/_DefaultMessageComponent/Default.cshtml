@@ -14,30 +14,30 @@
             <div class="col-12">
                 <!-- Contact Form Area -->
                 <div class="contact-form-area">
-                    <form action="#" method="post">
+                    <form id="messageForm" asp-controller="Default" asp-action="SendMessage" method="post" onsubmit="return sendMessage(event)">
                         <div class="row">
                             <div class="col-md-6 col-lg-4">
                                 <div class="form-group wow fadeInUp" data-wow-delay="100ms">
-                                    <input type="text" class="form-control" asp-for="Name" placeholder="Name">
+                                    <input type="text" class="form-control" asp-for="Name" placeholder="Adınız" required>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4">
                                 <div class="form-group wow fadeInUp" data-wow-delay="200ms">
-                                    <input type="email" class="form-control" asp-for="Email" placeholder="E-mail">
+                                    <input type="email" class="form-control" asp-for="Email" placeholder="E-mail" required>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <div class="form-group wow fadeInUp" data-wow-delay="300ms">
-                                    <input type="text" class="form-control" asp-for="Subject" placeholder="Konu">
+                                    <input type="text" class="form-control" asp-for="Subject" placeholder="Konu" required>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group wow fadeInUp" data-wow-delay="400ms">
-                                    <textarea name="message" class="form-control" asp-for="Content" cols="30" rows="10" placeholder="Mesajınızı Yazın"></textarea>
+                                    <textarea class="form-control" asp-for="Content" cols="30" rows="10" placeholder="Mesajınızı Yazın" required></textarea>
                                 </div>
                             </div>
                             <div class="col-12 text-center wow fadeInUp" data-wow-delay="500ms">
-                                <button class="btn oneMusic-btn mt-30" type="submit" onclick="sendMessage()">Mesajı Gönder <i class="fa fa-angle-double-right"></i></button>
+                                <button class="btn oneMusic-btn mt-30" type="submit">Mesajı Gönder <i class="fa fa-angle-double-right"></i></button>
                             </div>
                         </div>
                     </form>
@@ -47,26 +47,32 @@
     </div>
 </section>
 <script>
-  function sendMessage() {
-
-        Swal.fire({
-            title: "Tebrikler",
-            text: "Mesajınız Gönderildi!",
-            icon: "success",
-            showCancelButton: false,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Tamam",
-            cancelButtonText: "İptal"
-        }).then((result) => {
-            if (result.isConfirmed) {
-
-                window.location.href = "/Default/Index/" ;
-
-            }
-        });
-
+    // Formu sayfa yenilenmeden gönderir, sonucu SweetAlert ile gösterir
+    function sendMessage(e) {
+        e.preventDefault();
+        var form = document.getElementById("messageForm");
+        fetch(form.action, { method: "POST", body: new FormData(form) })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error();
+                }
+                form.reset();
+                Swal.fire({
+                    title: "Tebrikler",
+                    text: "Mesajınız Gönderildi!",
+                    icon: "success",
+                    confirmButtonColor: "#3085d6",
+                    confirmButtonText: "Tamam"
+                });
+            })
+            .catch(function () {
+                Swal.fire({
+                    title: "Hata",
+                    text: "Mesajınız gönderilemedi, lütfen tüm alanları doldurunuz.",
+                    icon: "error",
+                    confirmButtonText: "Tamam"
+                });
+            });
+        return false;
     }
-
-
 </script>

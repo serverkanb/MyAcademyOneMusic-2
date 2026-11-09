@@ -42,7 +42,7 @@ namespace OneMusic.WebUI.Controllers
 				var result = await _userManager.CreateAsync(user, model.Password);// user Appuser türünde bekliyor identityUser beklemiyor çünkü başta appuser türünde oluşturduk parametreyi
 				if (result.Succeeded)
 				{
-                    //await _userManager.AddToRoleAsync(user, "Visitor");
+                    await _userManager.AddToRoleAsync(user, "Visitor"); // yeni kullanıcılar dinleyici rolüyle başlar
                     return RedirectToAction("Index", "Login");
 				}
 				foreach (var item in result.Errors) // eğer yanlış olursa if ten çıkacak ve modelstate içerisinde hataları gösteriyoruz
@@ -51,10 +51,12 @@ namespace OneMusic.WebUI.Controllers
 				}
 
 			}
-            
+            else
+            {
+                ModelState.AddModelError("", "Şifreler uyuşmuyor");
+            }
 
-            
-            return View();
+            return View(model);
         }
 
 

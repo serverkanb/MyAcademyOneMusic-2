@@ -13,7 +13,7 @@ namespace OneMusic.EntityLayer.Entity
         public int SongId { get; set; }
 
         public string SongName { get; set; }
-        public string SongUrl { get; set; }
+        public string? SongUrl { get; set; }
         public int AlbumId { get; set; }
         public int? SingerId { get; set; }
 
@@ -23,8 +23,8 @@ namespace OneMusic.EntityLayer.Entity
 
  
 
-        public Singer Singer { get; set; }
-        public Album Album { get; set; }
+        public Singer? Singer { get; set; }
+        public Album? Album { get; set; }
 
         
         

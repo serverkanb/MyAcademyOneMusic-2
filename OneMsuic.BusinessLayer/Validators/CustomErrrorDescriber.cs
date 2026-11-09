@@ -29,7 +29,7 @@ namespace OneMsuic.BusinessLayer.Validators
 		{
 			return new IdentityError()
 			{
-				Description = "Şifre en az bir büyük harf(A-Z) içermelidir"
+				Description = "Şifre en az bir küçük harf(a-z) içermelidir"
 			};
 		}
 		public override IdentityError PasswordRequiresUpper()
@@ -44,7 +44,7 @@ namespace OneMsuic.BusinessLayer.Validators
 		{
 			return new IdentityError()
 			{
-				Description = "Şifre en az bir büyük özel karakter(*,+,.,-,_,....) içermelidir."
+				Description = "Şifre en az bir özel karakter(*,+,.,-,_,....) içermelidir."
 			};
 		}
 	}

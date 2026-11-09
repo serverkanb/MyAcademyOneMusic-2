@@ -40,21 +40,21 @@ namespace OneMusic.WebUI.Controllers
 
                 if (await _userManager.IsInRoleAsync(user, "Artist"))
                 {
-                    if (!string.IsNullOrEmpty(returnUrl))
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
 
                     return RedirectToAction("Index", "MyAlbum", new { area = "Artist" });
                 }
                 else if (await _userManager.IsInRoleAsync(user, "Admin"))
                 {
-                    if (!string.IsNullOrEmpty(returnUrl))
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
 
                     return RedirectToAction("Index", "AdminAbout");
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(returnUrl))
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         return Redirect(returnUrl);
 
                     return RedirectToAction("Index", "Default");

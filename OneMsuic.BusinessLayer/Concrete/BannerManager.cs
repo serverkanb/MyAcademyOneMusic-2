@@ -28,7 +28,7 @@ namespace OneMusic.BusinessLayer.Concrete
             _bannerDal.Delete(id);
         }
 
-        public Banner TGetById(int id)
+        public Banner? TGetById(int id)
         {
             return _bannerDal.GetById(id);
         }

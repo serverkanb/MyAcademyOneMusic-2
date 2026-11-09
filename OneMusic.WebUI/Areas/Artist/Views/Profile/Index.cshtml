@@ -9,7 +9,10 @@
 <!--Dosyadan resim seçebilmek için  enctype seçtik-->
 <form method="post" enctype="multipart/form-data">
     <div class="text-center">
-        <img src ="@Model.ImageUrl" style="width:100px:height:100px"
+        @if (!string.IsNullOrEmpty(Model?.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" style="width:100px;height:100px" />
+        }
     </div>
     <label>Ad</label>
     <input type="text" asp-for="Name" class="form-control" required />
@@ -21,14 +24,14 @@
     <input type="text" asp-for="UserName" class="form-control" required />
     <br />
     <label>Email</label>
-    <input type="text" asp-for="Email" class="form-control" required />
+    <input type="email" asp-for="Email" class="form-control" required />
     <br />
     <label>Telefon</label>
     <input type="text" asp-for="PhoneNumber" class="form-control" />
     <br />
     <input type="hidden" asp-for="ImageUrl" class="form-control" />
-    <label>Profil Resmi</label>
-    <input type="file" asp-for="ImageFile" class="form-control" required />
+    <label>Profil Resmi (değiştirmek istemiyorsanız boş bırakın)</label>
+    <input type="file" asp-for="ImageFile" class="form-control" accept=".jpg,.jpeg,.png" />
     <br />
     <label>Mevcut Şifreniz</label>
     <input type="password" asp-for="OldPassword" class="form-control" required />
@@ -40,8 +43,8 @@
     <input type="password" asp-for="ConfirmPassword" class="form-control"/>
     <br />
 
-    <p style="color:red">@Html.ValidationSummary()</p>
+    <div style="color:red">@Html.ValidationSummary()</div>
     
-    <button class="btn btn-outline-primary>">Bilgileri Güncelle</button>
+    <button class="btn btn-outline-primary">Bilgileri Güncelle</button>
 
 </form>

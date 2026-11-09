@@ -11,7 +11,7 @@ namespace OneMusic.DataAccessLayer.Abstract
     {
         // crud işlemlerini yaptığımız yer 
         List<T> GetList();
-        T GetById(int id);
+        T? GetById(int id);
 
         void Create(T entity);
 

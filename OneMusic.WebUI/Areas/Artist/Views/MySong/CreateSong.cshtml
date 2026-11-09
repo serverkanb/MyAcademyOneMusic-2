@@ -7,14 +7,15 @@
 <h3>Şarkı Ekleme Sayfası</h3>
 
 <form method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger"></div>
     <label>Şarkı Adı</label>
     <input type="text" asp-for="SongName" class="form-control" />
     <br />
     <label>Albüm Seçin</label>
-    <select asp-for="AlbumId" asp-items="@ViewBag.albums" class="form-control"><option>Albümü Seçiniz</option></select>
+    <select asp-for="AlbumId" asp-items="@ViewBag.albums" class="form-control"><option value="">Albümü Seçiniz</option></select>
     <br />
     <label>Şarkıyı Seçin</label>
-    <input type="file" asp-for="SongFile" class="form-control" >
+    <input type="file" asp-for="SongFile" class="form-control" accept=".mp3">
     <br />
     <button class="btn btn-outline-primary">Kaydet</button>
 </form>

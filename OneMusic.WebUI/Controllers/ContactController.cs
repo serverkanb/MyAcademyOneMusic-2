@@ -15,7 +15,7 @@ namespace OneMusic.WebUI.Controllers
         public IActionResult Index()
         {
             var values = _contactService.TGetList().OrderByDescending(x => x.ContactId).FirstOrDefault();
-            return View(values);
+            return View(values ?? new OneMusic.EntityLayer.Entity.Contact()); // kayıt yoksa sayfa boş bilgilerle açılır
         }
     }
 }

@@ -1,0 +1,28 @@
+@model SongViewModel
+@{
+    ViewData["Title"] = "UpdateSong";
+    Layout = "~/Areas/Artist/Views/ArtistLayout/Index.cshtml";
+}
+
+<h3>Şarkı Güncelleme Sayfası</h3>
+
+<form method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <input type="hidden" asp-for="SongId" />
+
+    <label>Şarkı Adı</label>
+    <input type="text" asp-for="SongName" class="form-control" required />
+    <br />
+    <label>Albüm</label>
+    <select asp-for="AlbumId" asp-items="@ViewBag.Albums" class="form-control"></select>
+    <br />
+    @if (!string.IsNullOrEmpty(Model?.SongUrl))
+    {
+        <label>Mevcut Şarkı</label>
+        <audio controls src="@Model.SongUrl" class="d-block mb-3"></audio>
+    }
+    <label>Yeni Şarkı Dosyası (değiştirmek istemiyorsanız boş bırakın)</label>
+    <input type="file" asp-for="SongFile" class="form-control" accept=".mp3" />
+    <br />
+    <button class="btn btn-outline-primary">Güncelle</button>
+</form>

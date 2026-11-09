@@ -12,10 +12,10 @@ namespace OneMusic.DataAccessLayer.Context
 {
     public class OneMusicContext : IdentityDbContext<AppUser,AppRole,int> // primary Key int değerdir dedik
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        // Bağlantı cümlesi artık appsettings.json -> ConnectionStrings:DefaultConnection içinden
+        // Program.cs'deki AddDbContext ile veriliyor.
+        public OneMusicContext(DbContextOptions<OneMusicContext> options) : base(options)
         {
-            optionsBuilder.UseSqlServer("server=LAPTOP-1IHFPICF;database=OneMusicDb-Re;trusted_connection=true;multipleactiveresultsets=true;trustservercertificate=true;");
-
         }
 
         public DbSet<About> Abouts { get; set; } 
@@ -30,6 +30,7 @@ namespace OneMusic.DataAccessLayer.Context
 
         public DbSet<Song> Songs { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
 
     }
