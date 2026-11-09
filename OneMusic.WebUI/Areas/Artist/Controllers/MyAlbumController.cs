@@ -97,16 +97,11 @@ namespace OneMusic.WebUI.Areas.Artist.Controllers
             return RedirectToAction("Index");
         }
 
-        // Albüm giriş yapan sanatçıya ait değilse null döner
+        // Albüm giriş yapan sanatçıya ait değilse null döner (kontrol iş katmanında)
         private async Task<Album?> GetOwnAlbumAsync(int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            var album = _albumService.TGetById(id);
-            if (user == null || album == null || album.AppUserId != user.Id)
-            {
-                return null;
-            }
-            return album;
+            return user == null ? null : _albumService.TGetArtistAlbum(user.Id, id);
         }
 
         private void LoadCategories(int? selectedId)

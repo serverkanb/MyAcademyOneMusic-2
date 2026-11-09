@@ -53,6 +53,12 @@ namespace OneMusic.BusinessLayer.Concrete
             return _albumDal.GetList();
         }
 
+        public Album? TGetArtistAlbum(int userId, int albumId)
+        {
+            var album = _albumDal.GetById(albumId);
+            return album != null && album.AppUserId == userId ? album : null;
+        }
+
         public List<Album> TGetNewAlbums()
         {
             return _albumDal.GetNewAlbums();

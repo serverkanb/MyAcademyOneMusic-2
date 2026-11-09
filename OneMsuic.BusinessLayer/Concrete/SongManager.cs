@@ -38,6 +38,12 @@ namespace OneMsuic.BusinessLayer.Concrete
            return  _songDal.GetList();
         }
 
+        public Song? TGetArtistSong(int userId, int songId)
+        {
+            var song = _songDal.GetSongWithAlbum(songId);
+            return song != null && song.Album != null && song.Album.AppUserId == userId ? song : null;
+        }
+
         public List<Song> TGetNewSongs()
         {
             return _songDal.GetNewSongs();

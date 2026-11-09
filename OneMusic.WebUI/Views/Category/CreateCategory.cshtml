@@ -7,9 +7,9 @@
 <h3>Yeni Kategori Ekle</h3>
 
 <form method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
     <label>Kategori Adı</label>
-    <input type="text" asp-for="CategoryName" class="form-control" required />
+    <input type="text" asp-for="CategoryName" class="form-control" />
+    <span class="text-danger" asp-validation-for="CategoryName"></span>
     <br />
     <button class="btn btn-outline-primary">Kaydet</button>
 </form>

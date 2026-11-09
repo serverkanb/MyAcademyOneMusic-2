@@ -26,7 +26,7 @@
                             <div class="d-flex align-items-center me-3">
                                 @if (!string.IsNullOrEmpty(song.Album?.CoverImage))
                                 {
-                                    <img src="@song.Album.CoverImage" alt="" style="width:56px;height:56px;object-fit:cover;margin-right:15px" />
+                                    <img src="@song.Album.CoverImage" alt="" class="playlist-cover" />
                                 }
                                 <div>
                                     <strong>@song.SongName</strong>

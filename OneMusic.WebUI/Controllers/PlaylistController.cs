@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OneMsuic.BusinessLayer.Abstract;
+using OneMsuic.BusinessLayer.Validators;
 using OneMusic.EntityLayer.Entities;
 using OneMusic.WebUI.Models;
 
@@ -11,9 +12,6 @@ namespace OneMusic.WebUI.Controllers
     [Authorize]
     public class PlaylistController : Controller
     {
-        private const int NameMaxLength = 100;
-        private const int DescriptionMaxLength = 500;
-
         private readonly IPlaylistService _playlistService;
         private readonly ISongService _songService;
         private readonly UserManager<AppUser> _userManager;
@@ -38,19 +36,21 @@ namespace OneMusic.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(PlaylistViewModel model)
         {
-            var error = Validate(model);
-            if (error != null)
-            {
-                TempData["playlistError"] = error;
-                return RedirectToAction("Index");
-            }
-
             var playlist = new Playlist
             {
-                Name = model.Name!.Trim(),
+                Name = model.Name?.Trim() ?? "",
                 Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim(),
                 AppUserId = CurrentUserId
             };
+
+            var validator = new PlaylistValidator();
+            var result = validator.Validate(playlist);
+            if (!result.IsValid)
+            {
+                TempData["playlistError"] = result.Errors[0].ErrorMessage;
+                return RedirectToAction("Index");
+            }
+
             _playlistService.TCreate(playlist);
             return RedirectToAction("Detail", new { id = playlist.PlaylistId });
         }
@@ -76,14 +76,17 @@ namespace OneMusic.WebUI.Controllers
             {
                 return NotFound();
             }
-            var error = Validate(model);
-            if (error != null)
+            playlist.Name = model.Name?.Trim() ?? "";
+            playlist.Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
+
+            var validator = new PlaylistValidator();
+            var result = validator.Validate(playlist);
+            if (!result.IsValid)
             {
-                TempData["playlistError"] = error;
+                TempData["playlistError"] = result.Errors[0].ErrorMessage;
                 return RedirectToAction("Detail", new { id = model.PlaylistId });
             }
-            playlist.Name = model.Name!.Trim();
-            playlist.Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description.Trim();
+
             _playlistService.TUpdate(playlist);
             return RedirectToAction("Detail", new { id = playlist.PlaylistId });
         }
@@ -156,33 +159,19 @@ namespace OneMusic.WebUI.Controllers
             {
                 return NotFound();
             }
-            var error = Validate(new PlaylistViewModel { Name = name });
-            if (error != null)
-            {
-                return BadRequest(error);
-            }
             var userId = CurrentUserId;
-            var playlist = new Playlist { Name = name!.Trim(), AppUserId = userId };
+            var playlist = new Playlist { Name = name?.Trim() ?? "", AppUserId = userId };
+
+            var validator = new PlaylistValidator();
+            var result = validator.Validate(playlist);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors[0].ErrorMessage);
+            }
+
             _playlistService.TCreate(playlist);
             _playlistService.TToggleSong(userId, playlist.PlaylistId, songId);
             return Json(new { id = playlist.PlaylistId, name = playlist.Name });
-        }
-
-        private static string? Validate(PlaylistViewModel model)
-        {
-            if (string.IsNullOrWhiteSpace(model.Name))
-            {
-                return "Çalma listesi adı boş bırakılamaz.";
-            }
-            if (model.Name.Trim().Length > NameMaxLength)
-            {
-                return $"Çalma listesi adı en fazla {NameMaxLength} karakter olabilir.";
-            }
-            if (model.Description != null && model.Description.Trim().Length > DescriptionMaxLength)
-            {
-                return $"Açıklama en fazla {DescriptionMaxLength} karakter olabilir.";
-            }
-            return null;
         }
     }
 }

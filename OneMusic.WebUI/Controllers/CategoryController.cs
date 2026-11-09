@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneMsuic.BusinessLayer.Abstract;
+using OneMsuic.BusinessLayer.Validators;
 using OneMusic.EntityLayer.Entities;
 
 namespace OneMusic.WebUI.Controllers
@@ -30,13 +31,19 @@ namespace OneMusic.WebUI.Controllers
         [HttpPost]
         public IActionResult CreateCategory(Category category)
         {
-            if (string.IsNullOrWhiteSpace(category.CategoryName))
+            var validator = new CategoryValidator();
+            ModelState.Clear();
+            var result = validator.Validate(category);
+            if (result.IsValid)
             {
-                ModelState.AddModelError("CategoryName", "Kategori adı boş bırakılamaz");
-                return View(category);
+                _categoryService.TCreate(category);
+                return RedirectToAction("Index");
             }
-            _categoryService.TCreate(category);
-            return RedirectToAction("Index");
+            result.Errors.ForEach(x =>
+            {
+                ModelState.AddModelError(x.PropertyName, x.ErrorMessage);
+            });
+            return View(category);
         }
 
         [HttpGet]
@@ -53,13 +60,19 @@ namespace OneMusic.WebUI.Controllers
         [HttpPost]
         public IActionResult UpdateCategory(Category category)
         {
-            if (string.IsNullOrWhiteSpace(category.CategoryName))
+            var validator = new CategoryValidator();
+            ModelState.Clear();
+            var result = validator.Validate(category);
+            if (result.IsValid)
             {
-                ModelState.AddModelError("CategoryName", "Kategori adı boş bırakılamaz");
-                return View(category);
+                _categoryService.TUpdate(category);
+                return RedirectToAction("Index");
             }
-            _categoryService.TUpdate(category);
-            return RedirectToAction("Index");
+            result.Errors.ForEach(x =>
+            {
+                ModelState.AddModelError(x.PropertyName, x.ErrorMessage);
+            });
+            return View(category);
         }
 
         public IActionResult DeleteCategory(int id)

@@ -162,20 +162,16 @@ namespace OneMusic.WebUI.Areas.Artist.Controllers
             return RedirectToAction("Index");
         }
 
-        // Şarkı giriş yapan sanatçının albümüne ait değilse null döner
+        // Şarkı giriş yapan sanatçının albümüne ait değilse null döner (kontrol iş katmanında)
         private async Task<Song?> GetOwnSongAsync(int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return null;
-            }
-            return _songService.TGetSongsWithAlbumByUserId(user.Id).FirstOrDefault(x => x.SongId == id);
+            return user == null ? null : _songService.TGetArtistSong(user.Id, id);
         }
 
         private bool IsOwnAlbum(int albumId, int userId)
         {
-            return _albumService.TGetAlbumsByArtist(userId).Any(x => x.AlbumId == albumId);
+            return _albumService.TGetArtistAlbum(userId, albumId) != null;
         }
 
         private void LoadAlbums(int userId, int? selectedId)
